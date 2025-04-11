@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -14,21 +12,19 @@ import { AppService } from './app.service';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get<string>('POSTGRES_HOST'),
-        port: configService.get<string>('POSTGRES_PORT')
-          ? configService.get<number>('POSTGRES_PORT')
-          : 5432,
-        password: configService.get<string>('POSTGRES_PASSWORD'),
-        username: configService.get<string>('POSTGRES_USER'),
-        database: configService.get<string>('POSTGRES_DATABASE'),
-        migrations: ['dist/migrations/*.js'],
+        host: configService.get('POSTGRES_HOST'),
+        port: configService.get<number>('POSTGRES_PORT') || 5432,
+        username: configService.get('POSTGRES_USER'),
+        password: configService.get('POSTGRES_PASSWORD'),
+        database: configService.get('POSTGRES_DATABASE'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        autoLoadEntities: true,
-        ssl: true,
+        synchronize: true, // Hanya untuk development!
+        logging: true,
+        ssl: false,
       }),
     }),
   ],
   controllers: [AppController],
-  providers: [ConfigService, JwtService, AppService],
+  providers: [AppService],
 })
 export class AppModule {}
